@@ -8,40 +8,45 @@
     href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-GoVMVRciLNZmu3TG3CF8fZExmOin2-70zfjQk6Vm996ja_HBh6_Q3Ug&s=10" />
 </head>
 
-<body>
+<body class="home-page">
 
   <div id="all-contents">
     <nav>
       <h1>Colton St. Pierre</h1>
       <ul id="nav-ul">
         <li class="nav-li">
-          <a href="index.html">Home</a>
+          <a class="nav-link" href="index.html">Home</a>
         </li>
         <li class="nav-li">
-          <button onclick="window.location.href='portfolio.html'" class="nav-button">Portfolio</button>
+          <a class="nav-link" href="portfolio.html">Portfolio</a>
         </li>
       </ul>
     </nav>
 
     <main>
       <div class="content">
-        <h2>Colton S.</h2>
         <p>St. Amant High</p>
 
         <div id="interests">
           <h3>Interests</h3>
           <ul>
-            <button id="myButton" class="interactive-btn">Gaming</button>
-            <button id="myButton2" class="interactive-btn">Swimming</button>
-            <button id="myButton3" class="interactive-btn">Coding</button>
+            <button id="myButton" class="interactive-btn"
+              onclick="window.location.href='http://en.wikipedia.org/wiki/Gaming'">Gaming</button>
+            <button id="myButton2" class="interactive-btn"
+              onclick="window.location.href='https://en.wikipedia.org/wiki/Swimming'">Swimming</button>
+            <button id="myButton3" class="interactive-btn"
+              onclick="window.location.href='https://en.wikipedia.org/wiki/Coding'">Coding</button>
           </ul>
         </div>
 
       </div>
 
       <div class="sidebar">
-        <img class="sidebar-img"
-          src="https://ih1.redbubble.net/image.5852336422.5095/tst,medium,507x507-pad,600x600,f8f8f8.u1.jpg">
+        <figure>
+          <img class="sidebar-img"
+            src="https://static.wikia.nocookie.net/logopedia/images/4/42/Deltarune_Icon.png/revision/latest?cb=20250625121436">
+          <figcaption>Deltarune</figcaption>
+        </figure>
       </div>
     </main>
 
