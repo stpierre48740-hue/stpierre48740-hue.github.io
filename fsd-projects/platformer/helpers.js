@@ -24,9 +24,9 @@ function main() {
     return;
   }
 
-  drawPlatforms();
   drawFakePlatforms();
   drawBadPlatforms();
+  drawPlatforms();
   drawProjectiles();
   drawCannons();
   drawCollectables();
@@ -233,7 +233,7 @@ function drawRobot() {
       player.x - hitDx,
       player.y - hitDy,
       player.width,
-      player.height
+      player.height,
     );
   } else {
     //for running to the left you mirror the image
@@ -248,7 +248,7 @@ function drawRobot() {
       -player.x - player.width + hitDx,
       player.y - hitDy,
       player.width,
-      player.height
+      player.height,
     );
     ctx.restore(); //put the canvas back to normal
   }
@@ -270,7 +270,7 @@ function collision() {
         platforms[i].x,
         platforms[i].y,
         platforms[i].width,
-        platforms[i].height
+        platforms[i].height,
       );
     }
   }
@@ -342,6 +342,13 @@ function projectileCollision() {
     return;
   }
 
+  var projectileHitBoxHeight = hitBoxHeight;
+  var projectileHitBoxY = player.y;
+  if (keyPress.down && player.onGround) {
+    projectileHitBoxHeight = hitBoxHeight / 2;
+    projectileHitBoxY = player.y + hitBoxHeight - projectileHitBoxHeight;
+  }
+
   for (var i = 0; i < projectiles.length; i++) {
     //this deletes any projectiles that go off the screen
     if (
@@ -361,8 +368,8 @@ function projectileCollision() {
     if (
       projectiles[i].x < player.x + hitBoxWidth &&
       projectiles[i].x + projectiles[i].width > player.x &&
-      projectiles[i].y < player.y + hitBoxHeight &&
-      projectiles[i].y + projectiles[i].height > player.y
+      projectiles[i].y < projectileHitBoxY + projectileHitBoxHeight &&
+      projectiles[i].y + projectiles[i].height > projectileHitBoxY
     ) {
       currentAnimationType = animationTypes.frontDeath;
       frameIndex = 0;
@@ -388,28 +395,21 @@ function badPlatformCollision() {
 }
 
 function deathOfPlayer() {
-  ctx.fillStyle = "grey";
-  ctx.fillRect(
-    canvas.width / 4,
-    canvas.height / 6,
-    canvas.width / 2,
-    canvas.height / 2
-  );
-  ctx.fillStyle = "black";
-  ctx.font = "800% serif";
-  ctx.fillText(
-    "You are dead",
-    canvas.width / 4,
-    canvas.height / 6 + canvas.height / 5,
-    (canvas.width / 16) * 14
-  );
-  ctx.font = "500% serif";
-  ctx.fillText(
-    "Hit any key to restart",
-    canvas.width / 4,
-    canvas.height / 6 + canvas.height / 3,
-    (canvas.width / 16) * 14
-  );
+  deathFadeAlpha = Math.min(deathFadeAlpha + 0.025, 1);
+
+  ctx.fillStyle = `rgba(0, 0, 0, ${deathFadeAlpha})`;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 76px monospace";
+  ctx.fillStyle = "white";
+  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 35);
+  ctx.font = "bold 20px monospace";
+  ctx.fillText("PRESS ANY KEY", canvas.width / 2, canvas.height / 2 + 45);
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+
   if (keyPress.any) {
     keyPress.any = false;
     window.location.reload();
@@ -436,6 +436,32 @@ function playerFrictionAndGravity() {
 
   if (player.onGround === false) {
     player.speedY = player.speedY + gravity;
+  }
+}
+
+function drawGrassPlatform(x, y, width, height) {
+  ctx.imageSmoothingEnabled = false;
+
+  ctx.fillStyle = "#9b5a3c";
+  ctx.fillRect(x, y + 8, width, height - 8);
+
+  ctx.fillStyle = "#00cc65";
+  ctx.fillRect(x, y, width, 12);
+
+  ctx.fillStyle = "#087a45";
+  const animationTime = Date.now() / 300;
+
+  for (let bladeX = Math.floor(x); bladeX < x + width; bladeX += 12) {
+    const sway = Math.round(Math.sin(animationTime + bladeX * 0.08) * 2) * 2;
+
+    ctx.fillRect(bladeX, y - 4 + sway, 4, 4);
+    ctx.fillRect(bladeX + 2 + sway, y, 4, 8);
+  }
+
+  ctx.fillStyle = "#6f3f2e";
+  for (let detailX = Math.floor(x) + 8; detailX < x + width; detailX += 36) {
+    ctx.fillRect(detailX, y + 18, 8, 4);
+    ctx.fillRect(detailX + 4, y + 22, 8, 4);
   }
 }
 
@@ -471,9 +497,13 @@ function drawPlatforms() {
     }
 
     // Draw the platform
-    const { color, x, y, width, height } = platforms[i];
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
+    const { color, x, y, width, height, renderAsGrass } = platforms[i];
+    if (renderAsGrass) {
+      drawGrassPlatform(x, y, width, height);
+    } else {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, width, height);
+    }
   }
 }
 
@@ -509,7 +539,7 @@ function makeGrid() {
     ctx.fillText(
       i, // text
       i - 15, // x location
-      25 // y location
+      25, // y location
     );
   }
 
@@ -523,7 +553,7 @@ function makeGrid() {
     ctx.fillText(
       i, // text
       10, // x location
-      i + 5 // y location
+      i + 5, // y location
     );
   }
   gridMade = true;
@@ -531,16 +561,39 @@ function makeGrid() {
 
 function drawProjectiles() {
   for (var i = 0; i < projectiles.length; i++) {
-    ctx.drawImage(
-      projectileImage,
-      projectiles[i].x,
-      projectiles[i].y,
-      projectiles[i].width,
-      projectiles[i].height
-    );
-    projectiles[i].x = projectiles[i].x + projectiles[i].speedX;
-    projectiles[i].y = projectiles[i].y + projectiles[i].speedY;
+    var projectile = projectiles[i];
+
+    ctx.filter = "brightness(0)";
+    for (var outlineX = -1; outlineX <= 1; outlineX++) {
+      for (var outlineY = -1; outlineY <= 1; outlineY++) {
+        if (outlineX !== 0 || outlineY !== 0) {
+          drawRotatedProjectile(
+            projectile,
+            projectile.x + outlineX,
+            projectile.y + outlineY,
+          );
+        }
+      }
+    }
+    ctx.filter = "none";
+    drawRotatedProjectile(projectile, projectile.x, projectile.y);
+    projectile.x = projectile.x + projectile.speedX;
+    projectile.y = projectile.y + projectile.speedY;
   }
+}
+
+function drawRotatedProjectile(projectile, x, y) {
+  ctx.save();
+  ctx.translate(x + projectile.width / 2, y + projectile.height / 2);
+  ctx.rotate(projectile.rotation);
+  ctx.drawImage(
+    projectileImage,
+    -projectile.width / 2,
+    -projectile.height / 2,
+    projectile.width,
+    projectile.height,
+  );
+  ctx.restore();
 }
 
 function drawCannons() {
@@ -552,7 +605,7 @@ function drawCannons() {
         cannons[i].x,
         cannons[i].y,
         cannons[i].projectileWidth,
-        cannons[i].projectileHeight
+        cannons[i].projectileHeight,
       );
     } else {
       cannons[i].projectileCountdown = cannons[i].projectileCountdown + 1;
@@ -574,6 +627,7 @@ function drawCannons() {
     }
 
     ctx.fillStyle = "grey";
+    ctx.imageSmoothingEnabled = false;
     ctx.save(); //save the current translation of the screen.
     ctx.translate(cannons[i].x, cannons[i].y); //you are moving the top left of the screen to the pictures location, this is because you can't rotate the image, you have to rotate the whole page
     ctx.rotate((cannons[i].rotation * Math.PI) / 180); //then you rotate. rotation is centered on 0,0 on the canvas, which is why we moved the picture to 0,0 with translate(x,y)
@@ -586,6 +640,12 @@ function drawCannons() {
 
 function drawCollectables() {
   for (var i = 0; i < collectables.length; i++) {
+    if (collectables[i].floating) {
+      collectables[i].y =
+        collectables[i].baseY +
+        Math.sin(Date.now() / 350 + collectables[i].floatPhase) * 10;
+    }
+
     if (collectables[i].collected !== true) {
       //draw on screen if not collected
       ctx.drawImage(
@@ -593,7 +653,7 @@ function drawCollectables() {
         collectables[i].x,
         collectables[i].y,
         collectableWidth,
-        collectableHeight
+        collectableHeight,
       );
     } else {
       //draw the icons at the top if collected
@@ -606,7 +666,7 @@ function drawCollectables() {
         200 + 100 * i,
         10,
         collectableWidth,
-        collectableHeight
+        collectableHeight,
       );
       ctx.globalAlpha = 1;
     }
@@ -626,21 +686,23 @@ function drawCollectables() {
       }
     }
 
-    //gravity
-    collectables[i].speedY = collectables[i].speedY + collectables[i].gravity;
-    collectables[i].y = collectables[i].y + collectables[i].speedY;
+    if (!collectables[i].floating) {
+      //gravity
+      collectables[i].speedY = collectables[i].speedY + collectables[i].gravity;
+      collectables[i].y = collectables[i].y + collectables[i].speedY;
 
-    // Check for collision with platforms in order to bounce
-    for (var j = 0; j < platforms.length; j++) {
-      if (
-        collectables[i].x + collectableWidth > platforms[j].x &&
-        collectables[i].x < platforms[j].x + platforms[j].width &&
-        collectables[i].y < platforms[j].y + platforms[j].height &&
-        collectables[i].y + collectableHeight > platforms[j].y
-      ) {
-        //bottom of collectable is below top of platform
-        collectables[i].y = collectables[i].y - collectables[i].speedY;
-        collectables[i].speedY *= -collectables[i].bounce;
+      // Check for collision with platforms in order to bounce
+      for (var j = 0; j < platforms.length; j++) {
+        if (
+          collectables[i].x + collectableWidth > platforms[j].x &&
+          collectables[i].x < platforms[j].x + platforms[j].width &&
+          collectables[i].y < platforms[j].y + platforms[j].height &&
+          collectables[i].y + collectableHeight > platforms[j].y
+        ) {
+          //bottom of collectable is below top of platform
+          collectables[i].y = collectables[i].y - collectables[i].speedY;
+          collectables[i].speedY *= -collectables[i].bounce;
+        }
       }
     }
   }
@@ -673,29 +735,21 @@ function checkForWin() {
 }
 
 function winGame() {
-  // If we reach this point, all collectables are collected
-  ctx.fillStyle = "grey";
-  ctx.fillRect(
-    canvas.width / 4,
-    canvas.height / 6,
-    canvas.width / 2,
-    canvas.height / 2
-  );
+  winFadeAlpha = Math.min(winFadeAlpha + 0.025, 1);
+
+  ctx.fillStyle = `rgba(0, 0, 0, ${winFadeAlpha})`;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillStyle = "white";
-  ctx.font = "800% serif";
-  ctx.fillText(
-    "You Win!",
-    canvas.width / 4,
-    canvas.height / 6 + canvas.height / 5,
-    (canvas.width / 16) * 14
-  );
-  ctx.font = "500% serif";
-  ctx.fillText(
-    "Hit any key to restart",
-    canvas.width / 4,
-    canvas.height / 6 + canvas.height / 3,
-    (canvas.width / 16) * 14
-  );
+  ctx.font = "bold 96px monospace";
+  ctx.fillText("YOU WIN", canvas.width / 2, canvas.height / 2 - 35);
+  ctx.font = "bold 20px monospace";
+  ctx.fillText("PRESS ANY KEY", canvas.width / 2, canvas.height / 2 + 45);
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+
   if (keyPress.any) {
     keyPress.any = false;
     window.location.reload();
@@ -713,7 +767,8 @@ function createPlatform(
   speedX = 1,
   minY = null,
   maxY = null,
-  speedY = 1
+  speedY = 1,
+  renderAsGrass = true,
 ) {
   platforms.push({
     x,
@@ -727,6 +782,7 @@ function createPlatform(
     minY,
     maxY,
     speedY,
+    renderAsGrass,
     directionX: 1, // 1 for right, -1 for left
     directionY: 1, // 1 for down, -1 for up
   });
@@ -760,7 +816,7 @@ function createCannon(
   height = defaultProjectileHeight,
   minPos = null,
   maxPos = null,
-  speed = 1
+  speed = 1,
 ) {
   if (wallLocation === "top") {
     cannons.push({
@@ -841,7 +897,7 @@ function createCollectable(
   bounce = 1,
   minX = null,
   maxX = null,
-  speed = 1
+  speed = 1,
 ) {
   if (type !== "") {
     var image = document.createElement("img");
@@ -851,6 +907,9 @@ function createCollectable(
       image,
       x,
       y,
+      baseY: y,
+      floating: true,
+      floatPhase: (collectables.length * Math.PI) / 2,
       speedY: 0,
       collected: false,
       alpha: 2,
@@ -907,6 +966,13 @@ function createProjectile(wallLocation, x, y, width, height) {
       height,
     });
   }
+
+  projectiles[projectiles.length - 1].rotation = {
+    top: (Math.PI * 3) / 4,
+    bottom: -Math.PI / 4,
+    left: Math.PI / 4,
+    right: (Math.PI * 5) / 4,
+  }[wallLocation];
 
   // putting this here instead of in every if
   projectiles[projectiles.length - 1].x -= (width - defaultProjectileWidth) / 2;

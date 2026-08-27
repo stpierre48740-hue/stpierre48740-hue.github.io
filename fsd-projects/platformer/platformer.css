@@ -8,7 +8,9 @@ body {
 }
 
 canvas {
-  background-color: lightblue;
+  background-image: url("https://static0.srcdn.com/wordpress/wp-content/uploads/2022/03/Ocarina-of-Time-3D-Hyrule-Castle.jpg");
+  background-size: cover;
+  background-position: center;
   margin: 20px;
   border-radius: 15px;
   border: 5px solid rgba(118, 0, 233, 0.375);

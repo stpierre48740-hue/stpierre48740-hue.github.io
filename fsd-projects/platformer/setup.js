@@ -35,6 +35,8 @@ let hitDy;
 let hitBoxWidth = 50 * playerScale;
 let hitBoxHeight = 105 * playerScale;
 let firstTimeSetup = true;
+let deathFadeAlpha = 0;
+let winFadeAlpha = 0;
 
 const keyPress = {
   any: false,

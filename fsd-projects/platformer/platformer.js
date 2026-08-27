@@ -18,7 +18,20 @@ $(function () {
 
     // Create walls - do not delete or modify this code
     createPlatform(-50, -50, canvas.width + 100, 50); // top wall
-    createPlatform(-50, canvas.height - 10, canvas.width + 100, 200, "rgb(118, 0, 233)"); // bottom wall
+    createPlatform(
+      -50,
+      canvas.height - 10,
+      canvas.width + 100,
+      200,
+      "grey",
+      null,
+      null,
+      1,
+      null,
+      null,
+      1,
+      false,
+    ); // bottom wall
     createPlatform(-50, -50, 50, canvas.height + 500); // left wall
     createPlatform(canvas.width, -50, 50, canvas.height + 100); // right wall
 
@@ -27,36 +40,59 @@ $(function () {
     //////////////////////////////////
 
     // TODO 1 - Enable the Grid
-     toggleGrid(1);
-
+    //toggleGrid(0);
 
     // TODO 2 - Create Platforms
-createPlatform(100,150, 250, 25);
-createPlatform(400, 500, 600, 25);
-createPlatform(1050,150, 250, 25);
-createPlatform(100, 625, 250, 25);
-createPlatform(400, 625, 800, 25);
-createPlatform(100, 625, 25, 125);
-createPlatform(400, 625, 25, 125);
-createPlatform(250, 400, 25, 25);
-createPlatform(400, 275, 25, 25);
-createPlatform(600, 200, 300, 25);
+    createPlatform(0, 155, 1200, 20);
+    createPlatform(300, 275, 1200, 20);
+    createPlatform(
+      300,
+      275,
+      -300,
+      20,
+      "#5a2e1b",
+      null,
+      null,
+      1,
+      null,
+      null,
+      1,
+      false,
+    );
+    createFakePlatform(280, 275, 20, 225, "#3b1f14");
+    createBadPlatform(0, 730, 1500, 20);
+    createPlatform(0, 450, 300, 20);
+    createPlatform(400, 450, 270, 20);
+    createPlatform(800, 450, 250, 20);
+    createPlatform(1200, 450, 250, 20, "grey", null, null, 0, 450, 650, 1);
+    createBadPlatform(0, 475, 1100, 20);
+    createPlatform(
+      0,
+      485,
+      1100,
+      20,
+      "grey",
+      null,
+      null,
+      1,
+      null,
+      null,
+      1,
+      false,
+    );
+    createPlatform(800, 700, 300, 20);
+    createPlatform(400, 700, 250, 20);
+    createPlatform(0, 700, 250, 20);
     // TODO 3 - Create Collectables
-createCollectable("database", 200, 700);
-createCollectable("database", 600, 100);
-createCollectable("database", 400, 300);
-createCollectable("database", 800, 700);
-createCollectable("database", 900, 100);
-    
+    collectableList.steve.image = "images/source-image-rotating.gif";
+    createCollectable("steve", 300, 375);
+    createCollectable("steve", 700, 375);
+    createCollectable("steve", 300, 600);
+    createCollectable("steve", 700, 600);
     // TODO 4 - Create Cannons
-createCannon("top", 600, 600);
-createCannon("right", 300, 800);
-createCannon("left", 200, 650);
-
-
-
-    
-    
+    createCannon("right", 475, 1500);
+    createCannon("left", 600, 1500);
+    createCannon("right", 200, 1500);
     //////////////////////////////////
     // ONLY CHANGE ABOVE THIS POINT //
     //////////////////////////////////
